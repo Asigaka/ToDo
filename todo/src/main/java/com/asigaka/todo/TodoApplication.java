@@ -1,15 +1,10 @@
 package com.asigaka.todo;
 
-import com.asigaka.todo.model.ToDo;
 import com.asigaka.todo.repository.ToDoRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @SpringBootApplication
@@ -24,9 +19,12 @@ public class TodoApplication {
 			System.out.println("-----------------------");
 			System.out.println("Commands list:");
 			System.out.println("1. Create new task");
-			System.out.println("2. Show all tasks");
+			System.out.println("2. Show all ready tasks");
+			System.out.println("3. Show all not ready tasks");
+			System.out.println("4. Complete task");
+			System.out.println("5. Add child task");
 			System.out.println("-----------------------");
-			System.out.println("Enter command number:");
+			System.out.println("Enter number of command:");
 			int commandNum = scanner.nextInt();
 			scanner.nextLine();
 			System.out.println("-----------------------");
@@ -36,15 +34,33 @@ public class TodoApplication {
 					String description = scanner.nextLine();
 
 					System.out.println("Enter deadline of task:" +
-							"\nExample: 10-01-2022");
+							"\nExample: 10-01-2022 12:23");
 					String deadline = scanner.nextLine();
 					toDoController.SaveToDo(description, deadline);
 					break;
 				case 2:
-					Iterable<ToDo> todoes = repository.findAll();
-					for (ToDo dos: todoes) {
-						System.out.println(dos.toString());
-					}
+					toDoController.ShowAllReadyTasks();
+					break;
+				case 3:
+					toDoController.ShowAllNotReadyTasks();
+					break;
+				case 4:
+					System.out.println("Enter task id");
+					toDoController.CompleteTaskById(scanner.nextLong());
+					break;
+				case 5:
+					System.out.println("Enter parent task id");
+					Long parentId = scanner.nextLong();
+					scanner.nextLine();
+
+					System.out.println("Enter description:");
+					String childDescription = scanner.nextLine();
+
+					System.out.println("Enter deadline of task:" +
+							"\nExample: 10-01-2022 12:23");
+					String childDeadline = scanner.nextLine();
+
+					toDoController.AddChildTaskToParentById(parentId, childDescription, childDeadline);
 					break;
 				default:
 					System.out.println("Number of command incorrect");

@@ -1,9 +1,7 @@
 package com.asigaka.todo.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 
 @Entity
@@ -14,16 +12,17 @@ public class ToDo {
     private String description;
     private String creationDate;
     private String deadlineDate;
-    private boolean isReadiness;
+    private boolean isReadiness = false;
+
+    private Long parentId;
 
     public ToDo() {
     }
 
-    public ToDo(String description, String creationDate, String deadlineDate, boolean isReadiness) {
+    public ToDo(String description, String creationDate, String deadlineDate) {
         this.description = description;
         this.creationDate = creationDate;
         this.deadlineDate = deadlineDate;
-        this.isReadiness = isReadiness;
     }
 
     public Long getId() {
@@ -46,13 +45,32 @@ public class ToDo {
         return isReadiness;
     }
 
+    public void setReadiness(boolean readiness) {
+        isReadiness = readiness;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
+
     @Override
     public String toString() {
-        return "ToDo{" +
-                "description='" + description + '\'' +
-                ", creationDate=" + creationDate +
-                ", deadlineDate=" + deadlineDate +
-                ", isReadiness=" + isReadiness +
-                '}';
+        String readyStr = "";
+        if (isReadiness) {
+            readyStr = "Ready";
+        } else {
+            readyStr = "Not ready";
+        }
+        return  "------------------" +
+                "\nId: " + id +
+                "\nDescription: " + description +
+                "\nCreation date: " + creationDate +
+                "\nDeadline: " + deadlineDate +
+                "\n" + readyStr +
+                "\n------------------";
     }
 }
