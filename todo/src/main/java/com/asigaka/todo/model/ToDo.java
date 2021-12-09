@@ -3,18 +3,19 @@ package com.asigaka.todo.model;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 public class ToDo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private long id;
     private String description;
     private String creationDate;
     private String deadlineDate;
     private boolean isReadiness = false;
 
-    private Long parentId;
+    private long parentId;
 
     public ToDo() {
     }
@@ -25,7 +26,7 @@ public class ToDo {
         this.deadlineDate = deadlineDate;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
@@ -49,7 +50,7 @@ public class ToDo {
         isReadiness = readiness;
     }
 
-    public Long getParentId() {
+    public long getParentId() {
         return parentId;
     }
 

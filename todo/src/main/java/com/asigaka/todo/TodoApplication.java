@@ -14,6 +14,8 @@ public class TodoApplication {
 		ToDoRepository repository = context.getBean(ToDoRepository.class);
 		ToDoController toDoController = new ToDoController(repository);
 
+		toDoController.RunCheckOfDeadline();
+
 		Scanner scanner = new Scanner(System.in);
 		while (true) {
 			System.out.println("-----------------------");
@@ -23,6 +25,7 @@ public class TodoApplication {
 			System.out.println("3. Show all not ready tasks");
 			System.out.println("4. Complete task");
 			System.out.println("5. Add child task");
+			System.out.println("6. Show all children by Id");
 			System.out.println("-----------------------");
 			System.out.println("Enter number of command:");
 			int commandNum = scanner.nextInt();
@@ -61,6 +64,11 @@ public class TodoApplication {
 					String childDeadline = scanner.nextLine();
 
 					toDoController.AddChildTaskToParentById(parentId, childDescription, childDeadline);
+					break;
+				case 6:
+					System.out.println("Enter parent task id");
+					toDoController.ShowAllChildrenByParentId(scanner.nextLong());
+					scanner.nextLine();
 					break;
 				default:
 					System.out.println("Number of command incorrect");
