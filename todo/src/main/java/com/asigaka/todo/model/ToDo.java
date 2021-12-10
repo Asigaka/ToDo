@@ -1,9 +1,6 @@
 package com.asigaka.todo.model;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Objects;
 
 @Entity
 public class ToDo {
@@ -13,8 +10,11 @@ public class ToDo {
     private String description;
     private String creationDate;
     private String deadlineDate;
-    private boolean isReadiness = false;
+    private boolean isReady = false;
 
+    /**
+     * ID родительской задачи. Если {@link #parentId} равна 0, то родтельской задачи у этой задачи нет
+     */
     private long parentId;
 
     public ToDo() {
@@ -38,12 +38,12 @@ public class ToDo {
         return deadlineDate;
     }
 
-    public boolean getReadiness() {
-        return isReadiness;
+    public boolean getReady() {
+        return isReady;
     }
 
-    public void setReadiness(boolean readiness) {
-        isReadiness = readiness;
+    public void setReady(boolean ready) {
+        isReady = ready;
     }
 
     public long getParentId() {
@@ -57,7 +57,7 @@ public class ToDo {
     @Override
     public String toString() {
         String readyStr = "";
-        if (isReadiness) {
+        if (isReady) {
             readyStr = "Ready";
         } else {
             readyStr = "Not ready";

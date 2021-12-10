@@ -7,6 +7,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.Scanner;
 
+//Попытался сделать нормальный View для вывода текста в консоль:)
 public class Menu implements ToDoView {
     private ConfigurableApplicationContext context;
     private ToDoController toDoController;
@@ -16,6 +17,9 @@ public class Menu implements ToDoView {
         this.context = context;
     }
 
+    /**
+     * Основной метод, начинающий полноценную работу меню
+     */
     public void MenusStart(){
         ToDoRepository repository = context.getBean(ToDoRepository.class);
         toDoController = new ToDoController(repository, this);
@@ -45,7 +49,7 @@ public class Menu implements ToDoView {
                     WriteAndSaveNewTask();
                     break;
                 case 2:
-                    toDoController.ShowAllNotReadyTasks();
+                    ShowAllNotReadyTasks();
                     break;
                 case 3:
                     CompleteTask();
@@ -61,6 +65,11 @@ public class Menu implements ToDoView {
                     break;
             }
         }
+    }
+
+    @Override
+    public void ShowAllNotReadyTasks() {
+        toDoController.ShowAllNotReadyTasks();
     }
 
     @Override
@@ -84,14 +93,13 @@ public class Menu implements ToDoView {
     }
 
     @Override
-    public void WriteAndSaveNewTask() {
-        System.out.println("Enter description:");
-        String description = scanner.nextLine();
+    public void ShowCompletedTask(String toDo) {
+        System.out.println(toDo + "\nis complete!");
+    }
 
-        System.out.println("Enter deadline of task:" +
-                "\nExample: 10-01-2022 12:23");
-        String deadline = scanner.nextLine();
-        toDoController.SaveToDo(description, deadline);
+    @Override
+    public void WriteAndSaveNewTask() {
+        toDoController.SaveToDo( GetRecordedDescription(), GetRecordedDeadline());
     }
 
     @Override
@@ -100,14 +108,7 @@ public class Menu implements ToDoView {
         Long parentId = scanner.nextLong();
         scanner.nextLine();
 
-        System.out.println("Enter description:");
-        String childDescription = scanner.nextLine();
-
-        System.out.println("Enter deadline of task:" +
-                "\nExample: 10-01-2022 12:23");
-        String childDeadline = scanner.nextLine();
-
-        toDoController.AddChildTaskToParentById(parentId, childDescription, childDeadline);
+        toDoController.AddChildTaskToParentById(parentId, GetRecordedDescription(), GetRecordedDeadline());
     }
 
     @Override
@@ -121,5 +122,24 @@ public class Menu implements ToDoView {
         System.out.println("Enter parent task id");
         toDoController.ShowAllChildrenByParentId(scanner.nextLong());
         scanner.nextLine();
+    }
+
+    /**
+     * @return Возвращает записанное пользователем описание
+     */
+    @Override
+    public String GetRecordedDescription() {
+        System.out.println("Enter description:");
+        return scanner.nextLine();
+    }
+
+    /**
+     * @return Возвращает записанный пользователем дедлайн
+     */
+    @Override
+    public String GetRecordedDeadline() {
+        System.out.println("Enter deadline of task:" +
+                "\nExample: 10-01-2022 12:23");
+        return scanner.nextLine();
     }
 }

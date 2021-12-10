@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class ToDoController {
     private final ToDoRepository repository;
     private final String dateFormat = "dd-MM-yyyy HH:mm";
+    private final int secondsToCheckDeadline = 60;
 
     private final ToDoView view;
 
@@ -21,6 +22,9 @@ public class ToDoController {
         this.view = view;
     }
 
+    /**
+     * Обрабатывает и сохраняет задачу в БД
+     */
     public void SaveToDo(String description, String deadline) {
         if (getDateByString(deadline) != null) {
             Date creationDate = new Date();
@@ -30,6 +34,10 @@ public class ToDoController {
         }
     }
 
+    /**
+     * Обрабатывает, сохраняет и возвращает задачу
+     * @return Возвращает сохранённую таску
+     */
     public ToDo SaveAndGetToDo(String description, String deadline) {
         ToDo toDo = null;
         if (getDateByString(deadline) != null) {
@@ -41,6 +49,10 @@ public class ToDoController {
         return toDo;
     }
 
+    /**
+     * @param dateStr Строка даты, которую нужно преобразовать в {@link Date}
+     * @return Возвращает объект типа {@link Date}, который распарсили из строки
+     */
     private Date getDateByString(String dateStr) {
         DateFormat df = new SimpleDateFormat(dateFormat);
         Date date = null;
@@ -52,44 +64,70 @@ public class ToDoController {
         return date;
     }
 
+    /**
+     * Выводит все невыполненные задачи
+     */
     public void ShowAllNotReadyTasks() {
         for (ToDo toDo: getTasksFromRepository()) {
-            if (!toDo.getReadiness() && toDo.getParentId() == 0) {
+            if (!toDo.getReady() && toDo.getParentId() == 0) {
                 view.ShowTask(toDo.toString());
             }
         }
     }
 
+    /**
+     * @param id ID задачи, которую нужно выполнить.
+     * Проверяет на существование таски с таким ID и готовность дочерних задач.
+     * Если проверки пройдены, помечает задачу как выполненую {@link ToDo#getReady()}
+     */
     public void CompleteTaskById(Long id) {
         ToDo toDo = getTaskById(id);
         if (toDo != null && AllChildrenTaskIsComplete(toDo.getId())) {
-            toDo.setReadiness(true);
+            toDo.setReady(true);
+            view.ShowCompletedTask(toDo.toString());
             repository.save(toDo);
         }
     }
 
+    /**
+     * Проверяет, есть ли дочерние задачи у задачи с переданным ID и выполнены ли они
+     */
     private boolean AllChildrenTaskIsComplete(long parentId){
         for (ToDo toDo: getTasksFromRepository()) {
             if (parentId == toDo.getParentId()) {
-                if (!AllChildrenTaskIsComplete(toDo.getId())) {
+                if (!toDo.getReady() || !AllChildrenTaskIsComplete(toDo.getId())) {
                     return false;
                 }
             }
         }
-
         return true;
     }
 
+    /**
+     * @param parentId ID родительской задачи
+     * @param childDescription Описание дочерней задачи
+     * @param deadline Дедлайн дочерней задачи
+     * Добавляет новую дочернюю задачу в БД и обновляет информацию
+     */
     public void AddChildTaskToParentById(Long parentId, String childDescription, String deadline) {
         ToDo parent = getTaskById(parentId);
-        ToDo child = SaveAndGetToDo(childDescription, deadline);
-        if (parent != null && child != null) {
-            child.setParentId(parent.getId());
-            repository.save(parent);
-            repository.save(child);
+        if (parent != null && !parent.getReady()) {
+            ToDo child = SaveAndGetToDo(childDescription, deadline);
+            if (child != null) {
+                child.setParentId(parent.getId());
+                repository.save(parent);
+                repository.save(child);
+            }
+        }
+        // Если родительская задача выполнена, то добавить новую дочернюю задачу нельзя
+        else {
+            view.ShowMsg("Task completed, you cannot add a child");
         }
     }
 
+    /**
+     * @return Возвращает задачу из БД по ID
+     */
     private ToDo getTaskById(Long id) {
         for (ToDo toDo: getTasksFromRepository()) {
             if (toDo.getId() == id) {
@@ -108,13 +146,17 @@ public class ToDoController {
         }
     }
 
+    /**
+     * Метод, вызывающий параллельный поток для проверки дедлайнов.
+     * Проверка дедлайнов срабатывает один раз в {@link #secondsToCheckDeadline} секунд
+     */
     public void RunCheckOfDeadline() {
         Runnable task = () -> {
             try {
-                TimeUnit.SECONDS.sleep(60);
+                TimeUnit.SECONDS.sleep(secondsToCheckDeadline);
                 for (ToDo toDo: getTasksFromRepository()) {
                     if (hoursBetween(getDateByString(toDo.getCreationDate())
-                            ,getDateByString(toDo.getDeadlineDate())) <= 1) {
+                            ,getDateByString(toDo.getDeadlineDate())) <= 1 && !toDo.getReady()) {
                         view.ShowDeadline(toDo.toString());
                     }
                 }
@@ -127,10 +169,16 @@ public class ToDoController {
         checkThread.start();
     }
 
+    /**
+     * @return Возвращает количество часов между датами
+     */
     private int hoursBetween(Date d1, Date d2){
         return (int)( (d2.getTime() - d1.getTime()) / (1000 * 60 * 60));
     }
 
+    /**
+     *  @return Возвращает список со всеми задачами из БД
+     */
     private Iterable<ToDo> getTasksFromRepository() {
         return repository.findAll();
     }
