@@ -1,15 +1,13 @@
 package com.asigaka.todo.controller;
 
-import com.asigaka.todo.ToDoView;
+import com.asigaka.todo.view.ToDoView;
 import com.asigaka.todo.model.ToDo;
 import com.asigaka.todo.repository.ToDoRepository;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
 
 public class ToDoController {
@@ -62,20 +60,24 @@ public class ToDoController {
         }
     }
 
-    public void ShowAllReadyTasks() {
-        for (ToDo toDo: getTasksFromRepository()) {
-            if (toDo.getReadiness() && toDo.getParentId() == 0) {
-                view.ShowTask(toDo.toString());
-            }
-        }
-    }
-
     public void CompleteTaskById(Long id) {
         ToDo toDo = getTaskById(id);
-        if (toDo != null) {
+        if (toDo != null && AllChildrenTaskIsComplete(toDo.getId())) {
             toDo.setReadiness(true);
             repository.save(toDo);
         }
+    }
+
+    private boolean AllChildrenTaskIsComplete(long parentId){
+        for (ToDo toDo: getTasksFromRepository()) {
+            if (parentId == toDo.getParentId()) {
+                if (!AllChildrenTaskIsComplete(toDo.getId())) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public void AddChildTaskToParentById(Long parentId, String childDescription, String deadline) {

@@ -1,4 +1,4 @@
-package com.asigaka.todo;
+package com.asigaka.todo.view;
 
 public interface ToDoView {
     void StartShowAllMenus();

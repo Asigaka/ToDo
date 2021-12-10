@@ -2,11 +2,12 @@ package com.asigaka.todo;
 
 import com.asigaka.todo.controller.ToDoController;
 import com.asigaka.todo.repository.ToDoRepository;
+import com.asigaka.todo.view.ToDoView;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.util.Scanner;
 
-public class Menu implements ToDoView{
+public class Menu implements ToDoView {
     private ConfigurableApplicationContext context;
     private ToDoController toDoController;
     private Scanner scanner;
@@ -30,11 +31,10 @@ public class Menu implements ToDoView{
             System.out.println("-----------------------");
             System.out.println("Commands list:");
             System.out.println("1. Create new task");
-            System.out.println("2. Show all ready tasks");
-            System.out.println("3. Show all not ready tasks");
-            System.out.println("4. Complete task");
-            System.out.println("5. Add child task");
-            System.out.println("6. Show all children by Id");
+            System.out.println("2. Show all not ready tasks");
+            System.out.println("3. Complete task");
+            System.out.println("4. Add child task");
+            System.out.println("5. Show all children by Id");
             System.out.println("-----------------------");
             System.out.println("Enter number of command:");
             int commandNum = scanner.nextInt();
@@ -45,18 +45,15 @@ public class Menu implements ToDoView{
                     WriteAndSaveNewTask();
                     break;
                 case 2:
-                    toDoController.ShowAllReadyTasks();
-                    break;
-                case 3:
                     toDoController.ShowAllNotReadyTasks();
                     break;
-                case 4:
-                   CompleteTask();
+                case 3:
+                    CompleteTask();
                     break;
-                case 5:
+                case 4:
                     WriteAndSaveNewChildTask();
                     break;
-                case 6:
+                case 5:
                     ShowAllChildren();
                     break;
                 default:
