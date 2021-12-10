@@ -30,10 +30,6 @@ public class ToDo {
         return id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     public String getCreationDate() {
         return creationDate;
     }
@@ -68,6 +64,7 @@ public class ToDo {
         }
         return  "------------------" +
                 "\nId: " + id +
+                "\nParent id: " + parentId +
                 "\nDescription: " + description +
                 "\nCreation date: " + creationDate +
                 "\nDeadline: " + deadlineDate +

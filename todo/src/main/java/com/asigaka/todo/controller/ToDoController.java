@@ -1,5 +1,6 @@
-package com.asigaka.todo;
+package com.asigaka.todo.controller;
 
+import com.asigaka.todo.ToDoView;
 import com.asigaka.todo.model.ToDo;
 import com.asigaka.todo.repository.ToDoRepository;
 
@@ -12,11 +13,14 @@ import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
 
 public class ToDoController {
-    private ToDoRepository repository;
-    private String dateFormat = "dd-MM-yyyy HH:mm";
+    private final ToDoRepository repository;
+    private final String dateFormat = "dd-MM-yyyy HH:mm";
 
-    public ToDoController(ToDoRepository repository) {
+    private final ToDoView view;
+
+    public ToDoController(ToDoRepository repository, ToDoView view) {
         this.repository = repository;
+        this.view = view;
     }
 
     public void SaveToDo(String description, String deadline) {
@@ -45,7 +49,7 @@ public class ToDoController {
         try {
             date = df.parse(dateStr);
         } catch (ParseException e) {
-            System.out.println("Incorrect date");
+            view.ShowMsg("Incorrect date");
         }
         return date;
     }
@@ -53,7 +57,7 @@ public class ToDoController {
     public void ShowAllNotReadyTasks() {
         for (ToDo toDo: getTasksFromRepository()) {
             if (!toDo.getReadiness() && toDo.getParentId() == 0) {
-                System.out.println(toDo.toString());
+                view.ShowTask(toDo.toString());
             }
         }
     }
@@ -61,7 +65,7 @@ public class ToDoController {
     public void ShowAllReadyTasks() {
         for (ToDo toDo: getTasksFromRepository()) {
             if (toDo.getReadiness() && toDo.getParentId() == 0) {
-                System.out.println(toDo.toString());
+                view.ShowTask(toDo.toString());
             }
         }
     }
@@ -90,36 +94,30 @@ public class ToDoController {
                 return toDo;
             }
         }
-        System.out.println("There is no task with such a id");
+        view.ShowMsg("There is no task with such a id");
         return null;
     }
 
     public void ShowAllChildrenByParentId(Long idParent) {
         for (ToDo toDo: getTasksFromRepository()) {
             if (idParent == toDo.getParentId()) {
-                System.out.println(toDo.toString());
+                view.ShowTask(toDo.toString());
             }
         }
     }
 
     public void RunCheckOfDeadline() {
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    TimeUnit.SECONDS.sleep(60);
-                    for (ToDo toDo: getTasksFromRepository()) {
-                        if (hoursBetween(getDateByString(toDo.getCreationDate())
-                                ,getDateByString(toDo.getDeadlineDate())) <= 1) {
-                            System.out.println("==========");
-                            System.out.println("Deadline will end soon!");
-                            System.out.println(toDo.toString());
-                            System.out.println("==========");
-                        }
+        Runnable task = () -> {
+            try {
+                TimeUnit.SECONDS.sleep(60);
+                for (ToDo toDo: getTasksFromRepository()) {
+                    if (hoursBetween(getDateByString(toDo.getCreationDate())
+                            ,getDateByString(toDo.getDeadlineDate())) <= 1) {
+                        view.ShowDeadline(toDo.toString());
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         };
 
