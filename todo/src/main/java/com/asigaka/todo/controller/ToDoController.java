@@ -65,7 +65,7 @@ public class ToDoController {
     }
 
     /**
-     * Выводит все невыполненные задачи
+     * Выводит все невыполненные задачи у которых нет родительской задачи
      */
     public void ShowAllNotReadyTasks() {
         for (ToDo toDo: getTasksFromRepository()) {
@@ -155,8 +155,8 @@ public class ToDoController {
             try {
                 TimeUnit.SECONDS.sleep(secondsToCheckDeadline);
                 for (ToDo toDo: getTasksFromRepository()) {
-                    if (hoursBetween(getDateByString(toDo.getCreationDate())
-                            ,getDateByString(toDo.getDeadlineDate())) <= 1 && !toDo.getReady()) {
+                    if (hoursBetween(new Date(),getDateByString(toDo.getDeadlineDate())) <= 1
+                            && !toDo.getReady()) {
                         view.ShowDeadline(toDo.toString());
                     }
                 }
